@@ -22,44 +22,45 @@ public class TerminalMultimodal implements Runnable {
     private ArrayList<Comboio> listaCombois;
     private ArrayList<Voo> listAvioes;
     private ArrayList<Passageiro> listaRecolhaPassageiro;
+    
     public TerminalMultimodal() throws IOException {
-
-        //this.listAutocarros = LeitorFicheiros.leitorFicheirosAutocarros("ficheiros/autocarros.txt");
-        //this.listaCombois = LeitorFicheiros.leitorFicheiroComboios("ficheiros/comboios.txt");
+        this.listaRecolhaPassageiro = new ArrayList<>();
+        this.listAutocarros = LeitorFicheiros.leitorFicheirosAutocarros("ficheiros/autocarros.txt");
+        this.listaCombois = LeitorFicheiros.leitorFicheiroComboios("ficheiros/comboios.txt");
         this.listAvioes = LeitorFicheiros.leitorFicheiroVoos("ficheiros/voos.txt");
 
     }
 
     @Override
     public void run() {
-
         int sum = 0;
-
-        listAvioes.stream().map((passageiro) -> {
-            try // dorme de 0 a 3 segundos, então coloca valor em Buffer
-            {
-                sleep(passageiro.getTempoDesembarque()); // thread sleep
+        while(!listAvioes.isEmpty() && !listAutocarros.isEmpty() &&!listCombois.isEmpty()&&!listRecolhaPassageiro.isEmpty()){
+        
+            listAvioes.stream().map((passageiro) -> {
+                try // dorme de 0 a 3 segundos, então coloca valor em Buffer
+                {
+                    sleep(passageiro.getTempoDesembarque()); // thread sleep
                 // configura valor no buffer
 
-                DescarregarPassageiroRecolhaBagagem(passageiro);
-            } // fim do try
-            // se a thread adormecida é interrompida, imprime rastreamento de pilha 
-            catch (InterruptedException exception) {
+                    DescarregarPassageiroRecolhaBagagem(passageiro);
+                } // fim do try
+                // se a thread adormecida é interrompida, imprime rastreamento de pilha 
+                catch (InterruptedException exception) {
 
-            }
-            return passageiro;
-        }).forEach((_item) -> {
-            System.out.printf("\n", "Producer done producing.",
-                    "Terminating Producer.");
-        }); // fim do método run
-
+                }
+                return passageiro;
+            }).forEach((_item) -> {
+                System.out.printf("\n", "Producer done producing.",
+                        "Terminating Producer.");
+            }); // fim do método run
+        }
     }
 
     public synchronized ArrayList<Voo> carregarPassageirosTipoTransporte(Passageiro bufferPassageiro) {
         try {
 
             System.out.println("\nlista de passageiros a carregar, apos a teragem de voos  ");
-            listAvioes = LeitorFicheiros.leitorFicheiroVoos("ficheiros/voos.txt");
+            
             listAvioes.stream().forEach((passageiro) -> {
                 System.out.println(passageiro.toString());
             });
@@ -76,7 +77,6 @@ public class TerminalMultimodal implements Runnable {
     private synchronized void DescarregarPassageiroRecolhaBagagem(Voo passageiro) throws InterruptedException {
         while (!verificarCapacidadePassageiroAceita(passageiro)) {
             tempAdicionalDesambarquePassageiroVoos(passageiro);
-
         }
         sleep(passageiro.getTempoRecolhaBagagem());
         for (Passageiro lisPassageiro : passageiro.getPassageiros()) {
